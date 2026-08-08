@@ -1005,3 +1005,272 @@ footer{view-transition-name:mt-foot}
              linear-gradient(95deg,rgba(12,16,20,.72) 0%,rgba(12,16,20,.42) 45%,rgba(12,16,20,.10) 100%)}
 .pagehead h1,.pagehead p,.pagehead .eyebrow{text-shadow:0 2px 12px rgba(0,0,0,.5)}
 .hero-cine h1,.hero-cine .lead{text-shadow:0 2px 14px rgba(0,0,0,.42)}
+
+/* === WARSTWA PREMIUM (retrofit 08.08.2026) === */
+/* ============================================================
+   OŚ PROCESU „PREMIUM" + OKNO NA NIERUCHOME TŁO + ODZNAKI + POWRÓT NA GÓRĘ
+   (08.08.2026 — wdrożenie decyzji K. z warsztatu ruchu II)
+
+   ⚠️ TEN PLIK JEST DOKLEJANY **PO** PLIKU RODZINY.
+   Powód: strukturę `.proces-line` stylują cztery rodziny (fachowcy, dom, klinika,
+   studio) jako poziomy rząd kart. Nowy układ musi je nadpisać, a base.css ładuje
+   się PRZED rodziną, więc tam by przegrał. Kolejność w multipage.py:
+       base.css → rodzina → TEN PLIK → motion.css → hero-fit.css
+
+   ZASADA BEZPIECZEŃSTWA (jak w całej warstwie ruchu):
+   stany „ukryte" nadaje WYŁĄCZNIE JavaScript przez klasę na <html>. Bez skryptu
+   albo przy jego błędzie strona wygląda jak przed tą zmianą — nigdy pusty ekran.
+   ============================================================ */
+
+/* ---------------- 1) OŚ PROCESU ---------------- */
+.proces-os .proc-grid{
+  display:grid;grid-template-columns:34% 1fr;gap:var(--space-8);align-items:start;
+}
+.proces-os .proc-side{position:sticky;top:calc(72px + var(--space-6))}
+.proces-os .proc-side .head{text-align:left;margin:0}
+.proces-os .proc-side .head h2{margin-bottom:var(--space-3)}
+.proces-os .proc-side .head p{margin:0}
+
+.proces-os .proc-count{display:flex;align-items:baseline;gap:var(--space-2);margin-top:var(--space-6)}
+.proces-os .pc-cur{
+  font-family:var(--font-display);font-size:2.6rem;line-height:1;color:var(--accent-d);
+  font-variant-numeric:tabular-nums;
+}
+.proces-os .pc-all{font-size:var(--text-base);color:var(--muted);font-variant-numeric:tabular-nums}
+.proces-os .proc-bar{
+  height:2px;background:var(--line);border-radius:2px;overflow:hidden;
+  max-width:14rem;margin-top:var(--space-3);
+}
+.proces-os .proc-bar > i{display:block;height:100%;width:0;background:var(--accent-d)}
+.proces-os .proc-now{
+  color:var(--muted);font-size:var(--text-sm);margin:var(--space-3) 0 0;min-height:2.4em;
+}
+
+/* ⚠️ TWARDY RESET OZDOBNIKÓW RODZINY (naprawa po teście 08.08.2026, demo hydraulika)
+   Rodziny nie tylko układają kroki w rząd — DORYSOWUJĄ do nich własną grafikę:
+   fachowcy.css ma poziomą kreskę (li::before), kropkę na osi (li::after), środkowanie
+   tekstu i `.pno` jako wielki numer nad tytułem. Po nałożeniu pionowej osi zostawało
+   z tego pobojowisko: numery w kółkach po lewej, a tytuły wyśrodkowane po prawej
+   z wiszącymi kropkami i liniami.
+   Nadpisujemy z `!important`, bo to jedyny sposób, żeby ta warstwa wygrała z CZTEREMA
+   rodzinami naraz (fachowcy, dom, klinika, studio), a każda dorysowuje coś innego.
+   Zasięg jest wąski — wyłącznie wnętrze `.proces-os`. */
+.proces-os .proces-line > li::before,
+.proces-os .proces-line > li::after{content:none !important;display:none !important}
+.proces-os .proces-line > li{padding:0 !important;position:relative}
+.proces-os .proces-line > li .pno,
+.proces-os .proces-line > li h3,
+.proces-os .proces-line > li p{text-align:left !important;margin-inline:0 !important;max-width:none !important}
+.proces-os .proces-line > li .pno{
+  font-family:var(--font-body,inherit) !important;font-weight:500 !important;
+  font-size:var(--text-sm) !important;letter-spacing:0 !important;margin-bottom:0 !important;
+}
+
+/* lista: z poziomego rzędu rodziny na pionową oś */
+.proces-os .proces-line{
+  display:flex;flex-direction:column;gap:var(--space-5);
+  position:relative;margin:0;padding:0;list-style:none;counter-reset:none;
+  grid-template-columns:none;
+}
+.proces-os .proces-line:before{
+  content:"";position:absolute;left:1.19rem;top:1.2rem;bottom:1.2rem;width:1px;background:var(--line);
+}
+.proces-os .proces-line > li{
+  display:grid;grid-template-columns:2.4rem 1fr;gap:var(--space-4);align-items:start;
+  background:none;border:0;padding:0;margin:0;box-shadow:none;
+}
+.proces-os .proces-line > li .pno{
+  grid-row:1 / span 3;width:2.4rem;height:2.4rem;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--paper);border:1px solid var(--line);color:var(--muted);
+  font-size:var(--text-sm);font-variant-numeric:tabular-nums;position:relative;z-index:1;
+  top:auto;left:auto;right:auto;bottom:auto;transform:none;
+}
+.proces-os .proces-line > li h3,
+.proces-os .proces-line > li p{grid-column:2;margin:0}
+.proces-os .proces-line > li h3{margin-bottom:var(--space-2)}
+.proces-os .proces-line > li p{color:var(--ink-soft)}
+
+/* karta kroku — tło i ramka na kolumnie treści, nie na całym <li> */
+.proces-os .proces-line > li h3,
+.proces-os .proces-line > li p{padding-left:0}
+.proces-os .proces-line > li > h3{
+  padding-top:.15rem;
+}
+
+/* ---- stany sterowane skryptem (klasa .os-on na <html>) ---- */
+.os-on .proces-os .proces-line > li{
+  opacity:.38;
+  transition:opacity .55s ease;
+}
+.os-on .proces-os .proces-line > li h3,
+.os-on .proces-os .proces-line > li p{
+  transform:translateX(var(--os-dx, 1.4rem));
+  transition:transform .65s cubic-bezier(.16,.84,.44,1);
+}
+.os-on .proces-os .proces-line > li.os-seen{opacity:1}
+.os-on .proces-os .proces-line > li.os-seen h3,
+.os-on .proces-os .proces-line > li.os-seen p{transform:translateX(0)}
+.os-on .proces-os .proces-line > li.os-live .pno{
+  background:var(--accent-d);border-color:var(--accent-d);color:var(--paper);
+  transition:background .45s ease,color .45s ease,border-color .45s ease;
+}
+.os-on .proces-os .proces-line > li.os-done .pno{border-color:var(--accent-d);color:var(--accent-d)}
+.os-on .proces-os .proc-bar > i{transition:width .45s cubic-bezier(.16,.84,.44,1)}
+
+@media (max-width:900px){
+  .proces-os .proc-grid{grid-template-columns:1fr;gap:var(--space-6)}
+  .proces-os .proc-side{position:static}          /* przyklejony tytuł zjadałby górę ekranu */
+  .proces-os .proc-count{margin-top:var(--space-4)}
+  .proces-os .proc-now{display:none}
+  .os-on .proces-os .proces-line > li h3,
+  .os-on .proces-os .proces-line > li p{transform:none}   /* wjazd z boków tylko na dużym ekranie */
+}
+@media (prefers-reduced-motion:reduce){
+  .os-on .proces-os .proces-line > li{opacity:1}
+  .os-on .proces-os .proces-line > li h3,
+  .os-on .proces-os .proces-line > li p{transform:none}
+}
+
+/* ---------------- 2) OKNO NA NIERUCHOME TŁO ----------------
+   `clip-path` na sekcji tworzy kontekst przycinający, więc dziecko `position:fixed`
+   przykleja się do OKNA PRZEGLĄDARKI, ale rysuje się wyłącznie w obrębie sekcji.
+   ⛔ NIE `background-attachment:fixed` (tak robi irismeble.pl) — to nie działa na iOS,
+   a dema oglądane są głównie na telefonie. */
+.stopklatka{
+  position:relative;height:min(78vh,620px);overflow:hidden;
+  clip-path:inset(0);            /* to jest cały mechanizm — nie usuwać */
+  background:var(--ink);
+  margin:var(--space-10) 0;
+}
+.stopklatka .stk-bg{
+  position:fixed;inset:0;background-size:cover;background-position:center;
+  will-change:transform;
+}
+.stopklatka .stk-cap{
+  position:absolute;left:0;right:0;bottom:0;margin:0;
+  padding:var(--space-6) var(--space-6) var(--space-5);
+  color:#fff;font-family:var(--font-display);font-size:var(--text-lg);
+  background:linear-gradient(0deg,rgba(0,0,0,.55),transparent);
+}
+/* Telefon: pełna wysokość okna wyglądałaby jak przypadkowa pusta przerwa między sekcjami. */
+@media (max-width:700px){ .stopklatka{height:52vh;margin:var(--space-8) 0} }
+/* Bezpiecznik: gdy ktoś kiedyś doda transform na przodku sekcji, przyszpilenie się gubi
+   i zdjęcie „ucieka". Wtedy lepiej mieć zwykłe, nieruchome tło niż rozjechany kadr. */
+@supports not (clip-path: inset(0)){
+  .stopklatka .stk-bg{position:absolute}
+}
+
+/* ---------------- 3) ODZNAKI / WYRÓŻNIENIA ---------------- */
+.odznaki{padding:var(--space-9) 0}
+.odznaki .odz-row{
+  list-style:none;margin:0;padding:0;
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+  gap:var(--space-8) var(--space-10);
+}
+.odznaki .odz img{
+  display:block;height:5.2rem;width:auto;max-width:11rem;object-fit:contain;
+}
+/* ⛔ Bez wyblakłego szarego filtra, jaki ma irismeble.pl — odznaka to najmocniejszy
+   dowód, jaki firma ma; przygaszona marnuje się (decyzja K. 08.08.2026). */
+@media (max-width:700px){
+  .odznaki{padding:var(--space-7) 0}
+  .odznaki .odz-row{gap:var(--space-6)}
+  .odznaki .odz img{height:4rem}
+}
+
+/* ---------------- 4) IKONY SPOŁECZNOŚCIOWE W STOPCE ---------------- */
+.foot-soc{display:flex;gap:var(--space-3);margin-top:var(--space-4)}
+.foot-soc .soc{
+  width:2.25rem;height:2.25rem;border-radius:var(--r-sm);
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.22);color:inherit;
+  transition:border-color .2s ease,transform .2s ease,background .2s ease;
+}
+.foot-soc .soc svg{width:1.05rem;height:1.05rem;display:block}
+.foot-soc .soc:hover{border-color:var(--accent);background:rgba(255,255,255,.06);transform:translateY(-1px)}
+.foot-soc .soc:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------------- 5) POWRÓT NA GÓRĘ ---------------- */
+.to-top{
+  position:fixed;right:var(--space-5);bottom:var(--space-5);z-index:40;
+  width:2.75rem;height:2.75rem;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  background:var(--paper);color:var(--ink);border:1px solid var(--line);
+  box-shadow:0 4px 16px rgba(0,0,0,.14);cursor:pointer;
+  opacity:0;visibility:hidden;transform:translateY(6px);
+  transition:opacity .25s ease,transform .25s ease,visibility .25s;
+}
+.to-top.show{opacity:1;visibility:visible;transform:translateY(0)}
+.to-top svg{width:1.1rem;height:1.1rem}
+.to-top:hover{border-color:var(--accent)}
+.to-top:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Nie wolno zasłonić przyklejonego paska „Zadzwoń" na telefonie — tam siada wyżej. */
+@media (max-width:680px){
+  body:has(.sticky-call) .to-top,
+  body:has(.sticky-reserve) .to-top{bottom:calc(var(--space-5) + 4.5rem)}
+}
+
+/* ---------------- 6) NAZWA FIRMY NA PIERWSZYM EKRANIE ----------------
+   Wariant „nazwa ustępuje miejsca" (wybór K. z warsztatu ruchu II):
+   nazwa wchodzi duża, po chwili siada do swojego rozmiaru i robi miejsce
+   nagłówkowi sprzedażowemu. Marka i sprzedaż mieszczą się w jednym ekranie.
+
+   Rozmiar zależy od DŁUGOŚCI nazwy (klasę wylicza multipage.py: bm-l / bm-m / bm-s),
+   a nazwy dłuższe niż 30 znaków nie dostają tej sekcji wcale — patrz brandmark().
+   Skalowanie dotyczy TEKSTU, nie zdjęcia: zakaz ruchu geometrycznego na .hero-cine>img
+   (shimmer na teksturach) pozostaje nienaruszony. */
+.hero-cine .brandmark{
+  display:block;line-height:.95;margin:0 0 var(--space-4);
+  font-family:var(--font-display);font-weight:600;color:#fff;
+  text-shadow:0 2px 30px rgba(0,0,0,.38);
+  letter-spacing:.14em;
+}
+.hero-cine .brandmark .bm-line{display:block;overflow:hidden}
+.hero-cine .brandmark .bm-line > span{display:block}
+.hero-cine .brandmark.bm-l{font-size:clamp(2.4rem,7.4vw,5.2rem)}
+.hero-cine .brandmark.bm-m{font-size:clamp(1.9rem,5.2vw,3.6rem);letter-spacing:.1em}
+.hero-cine .brandmark.bm-s{font-size:clamp(1.5rem,3.6vw,2.4rem);letter-spacing:.07em}
+/* Bardzo wąskie ekrany: nazwa musi się złamać, a nie wyjechać poza kadr. */
+.hero-cine .brandmark{overflow-wrap:anywhere}
+
+/* stany startowe nadaje TYLKO skrypt (klasa .bm-on na <html>) */
+.bm-on .hero-cine .brandmark{opacity:0;transform:scale(1.42);transform-origin:left center}
+.bm-on .hero-cine .hero-copy .eyebrow,
+.bm-on .hero-cine .hero-copy h1,
+.bm-on .hero-cine .hero-copy .lead,
+.bm-on .hero-cine .hero-copy .hero-actions{opacity:0}
+.bm-on .hero-cine .brandmark.bm-in{
+  opacity:1;transform:scale(1);
+  transition:opacity .6s ease, transform 1s cubic-bezier(.16,.84,.44,1) .38s;
+}
+.bm-on .hero-cine .brandmark.bm-in ~ .eyebrow{opacity:1;transition:opacity .6s ease .9s}
+.bm-on .hero-cine .brandmark.bm-in ~ h1{opacity:1;transition:opacity .6s ease 1s}
+.bm-on .hero-cine .brandmark.bm-in ~ .lead{opacity:1;transition:opacity .6s ease 1.1s}
+.bm-on .hero-cine .brandmark.bm-in ~ .hero-actions{opacity:1;transition:opacity .6s ease 1.2s}
+@media (prefers-reduced-motion:reduce){
+  .bm-on .hero-cine .brandmark{opacity:1;transform:none}
+  .bm-on .hero-cine .hero-copy > *{opacity:1 !important;transition:none !important}
+}
+
+/* ---------- ZNAK FIRMOWY W HERO (08.08.2026) ----------
+   Musi być TUTAJ, a nie tylko w proces-os.css: ten plik doklejamy na samym końcu i tylko on
+   wiąże rozmiary z wysokością okna. Pomiar na demie ADIVER: hero z nazwą urosło do 1087 px
+   przy oknie 893 px i przycisk wypadł pod krawędź — czyli wróciła wpadka, dla której hero-fit
+   w ogóle powstał. `min(..., Xsvh)` sprawia, że na niskim ekranie nazwa maleje razem z resztą.
+   Nazwa NIE ŁAMIE SIĘ na dwie linie (to zjadało kolejne 80 px) — przy dłuższych po prostu maleje. */
+.hero-cine .brandmark{
+  margin-bottom:min(var(--space-5),2.6svh);
+  white-space:nowrap;
+}
+/* Rozmiar CELOWO mniejszy od nagłówka. Pierwsza wersja dała 62 px przy nagłówku 60 px —
+   dwa napisy tej samej wagi jeden nad drugim, więc oko nie wiedziało, co czytać najpierw.
+   Znak firmowy ma się przedstawiać, a sprzedawać ma nagłówek pod nim. */
+.hero-cine .brandmark.bm-l{font-size:min(clamp(1.7rem,1.1rem + 2.2vw,2.7rem),5svh)}
+.hero-cine .brandmark.bm-m{font-size:min(clamp(1.45rem,1rem + 1.7vw,2.2rem),4.2svh)}
+.hero-cine .brandmark.bm-s{font-size:min(clamp(1.2rem,.9rem + 1.2vw,1.7rem),3.4svh)}
+/* Wąski telefon: nazwa ma prawo się złamać, ale wtedy jest już mała. */
+@media (max-width:560px){
+  .hero-cine .brandmark{white-space:normal;overflow-wrap:anywhere}
+}
+

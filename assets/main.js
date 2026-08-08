@@ -495,3 +495,106 @@
 
 /* === licznik otwarć demo (buy-signal) + geo === */
 (function(){try{if(String(location.protocol).indexOf('http')!==0)return;try{if(/[?&#]team=1/.test(location.search+location.hash)){localStorage.setItem('nb_team','1');}}catch(e){}try{if(localStorage.getItem('nb_team')==='1')return;}catch(e){}if((document.referrer||'').indexOf('crm-newbeginning')>-1)return;try{if(navigator.webdriver)return;}catch(e){}try{if(/^https?:\/\/(kris20032|impulseo-pl)\.github\.io\/?$/i.test(document.referrer||''))return;}catch(e){}if(sessionStorage.getItem('_dv'))return;sessionStorage.setItem('_dv','1');var seg=(location.pathname.split('/').filter(Boolean)[0])||'';var base=location.origin+(seg?('/'+seg):'');var ua='';try{ua=(navigator.userAgent||'').slice(0,300);}catch(e){}var EP='https://zngfubfinbojfgaxdrbf.supabase.co/rest/v1/demo_views';var KEY='sb_publishable_MWwoyGlSCWnJ4awtOPF0ow_ZVS0Y8qK';function send(g){try{fetch(EP,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'return=minimal'},body:JSON.stringify({demo_url:base,page:location.pathname,referrer:(document.referrer||null),user_agent:(ua||null),ip:(g&&g.ip)||null,country:(g&&g.cc)||null,city:(g&&g.city)||null})}).catch(function(){});}catch(e){}}var done=false;function once(g){if(done)return;done=true;send(g);}try{var t=setTimeout(function(){once(null);},1500);fetch('https://ipwho.is/?fields=ip,success,country_code,city',{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){clearTimeout(t);once(d&&d.success!==false?{ip:d.ip,cc:d.country_code,city:d.city}:null);}).catch(function(){clearTimeout(t);once(null);});}catch(e){once(null);}}catch(e){}})();
+
+/* === WARSTWA PREMIUM (retrofit) === */
+/* ============================================================
+   OŚ PROCESU „PREMIUM" + POWRÓT NA GÓRĘ + WEJŚCIE NAZWY W HERO
+   (08.08.2026 — wdrożenie decyzji K. z warsztatu ruchu II)
+
+   ZASADA (ta sama co w motion.js): stan „ukryty" nadaje WYŁĄCZNIE ten skrypt,
+   klasą na <html>. Gdy go zabraknie albo rzuci wyjątek — strona wygląda jak przed
+   zmianą. Nigdy pusty ekran, nigdy niewidoczna treść.
+
+   Każdy blok jest osobną funkcją w osobnym try — błąd w jednym NIE zabija reszty
+   (wpadka z 08.08: własny kod w tym samym <script> co main.js przestał działać,
+   bo wyjątek wyżej ubił cały blok).
+   ============================================================ */
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var safe = function (name, fn) { try { fn(); } catch (e) { /* jeden efekt mniej, strona działa */ } };
+
+  /* ---------- 1) OŚ PROCESU ---------- */
+  safe('os', function () {
+    var sec = document.querySelector('.proces-os');
+    if (!sec) return;
+    var items = [].slice.call(sec.querySelectorAll('.proces-line > li'));
+    if (items.length < 2) return;
+
+    document.documentElement.classList.add('os-on');
+    // kierunek wjazdu naprzemiennie — wynika z POZYCJI kroku, nie z losowania
+    items.forEach(function (li, i) { li.style.setProperty('--os-dx', (i % 2 ? '-1.4rem' : '1.4rem')); });
+
+    var cur = sec.querySelector('.pc-cur'), bar = sec.querySelector('.proc-bar > i'), now = sec.querySelector('.proc-now');
+    var titles = items.map(function (li) { var h = li.querySelector('h3'); return h ? h.textContent : ''; });
+
+    function upd() {
+      var vh = window.innerHeight, mid = vh * 0.52, best = -1, bestD = Infinity;
+      items.forEach(function (li, i) {
+        var r = li.getBoundingClientRect();
+        if (r.top < vh * 0.92) li.classList.add('os-seen');
+        var d = Math.abs((r.top + r.height / 2) - mid);
+        if (r.bottom > 0 && r.top < vh && d < bestD) { bestD = d; best = i; }
+      });
+      items.forEach(function (li, i) {
+        li.classList.toggle('os-live', i === best);
+        li.classList.toggle('os-done', best > -1 && i < best);
+      });
+      if (best > -1) {
+        var n = best + 1;
+        if (cur) cur.textContent = (n < 10 ? '0' : '') + n;
+        if (now) now.textContent = titles[best];
+        if (bar) bar.style.width = (n / items.length * 100) + '%';
+      }
+    }
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(function () { upd(); ticking = false; });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    // Przeliczenie po doładowaniu zdjęć: układ przesuwa się PO pierwszym pomiarze, a zdarzenie
+    // przewijania wtedy nie leci — bez tego kroki potrafią zostać przygaszone mimo że są na ekranie.
+    window.addEventListener('load', upd);
+    [60, 400, 1200, 2500].forEach(function (t) { setTimeout(upd, t); });
+  });
+
+  /* ---------- 2) POWRÓT NA GÓRĘ ---------- */
+  safe('toTop', function () {
+    var btn = document.createElement('button');
+    btn.className = 'to-top';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Wróć na górę strony');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    document.body.appendChild(btn);
+    btn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    });
+    var t = false;
+    function upd() {
+      if (t) return; t = true;
+      requestAnimationFrame(function () {
+        btn.classList.toggle('show', window.scrollY > window.innerHeight * 1.2);
+        t = false;
+      });
+    }
+    window.addEventListener('scroll', upd, { passive: true });
+    upd();
+  });
+
+  /* ---------- 3) WEJŚCIE NAZWY W HERO ----------
+     Wariant „nazwa ustępuje miejsca" (wybór K. z warsztatu): nazwa wchodzi duża,
+     po chwili siada do swojego rozmiaru i robi miejsce nagłówkowi sprzedażowemu. */
+  safe('brand', function () {
+    var bm = document.querySelector('.hero-cine .brandmark');
+    if (!bm || reduce) return;
+    document.documentElement.classList.add('bm-on');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { bm.classList.add('bm-in'); });
+    });
+    // Bezpiecznik czasowy: gdyby przejście nie wystartowało (np. karta w tle przy wejściu),
+    // po sekundzie i tak odsłaniamy treść — nikt nigdy nie zobaczy pustego hero.
+    setTimeout(function () { bm.classList.add('bm-in'); }, 1000);
+  });
+})();
+
