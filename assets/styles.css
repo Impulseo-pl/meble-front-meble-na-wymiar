@@ -1371,3 +1371,8 @@ footer{view-transition-name:mt-foot}
 /* Lekcja 2026-08-06-012: `.nav a` (specyficzność 0,3,2) bije `.btn` i przycisk w menu
    dostawał ciasny padding — „Zapytaj o wycenę" wyglądał jak przyklejony do ramki. */
 .nav .nav-links a.btn{padding:11px 18px}
+
+/* Podkreślenie ma kończyć się na literach, nie ciągnąć przez cały wiersz:
+   reguła `.bm-line > span{display:block}` (0,3,1) bije samą klasę (0,3,0), więc
+   inline-block trzeba nadać z tą samą siłą selektora. */
+.hero-cine .brandmark .bm-line > span.bm-nazwa{display:inline-block}
