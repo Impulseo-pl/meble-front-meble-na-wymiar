@@ -1367,3 +1367,7 @@ footer{view-transition-name:mt-foot}
 /* znaczek Google przy linku do opinii — bramka [opinie-google] */
 .op-google{display:inline-flex;align-items:center;gap:.5rem}
 .op-google .op-g-ico{flex:0 0 auto;display:block}
+
+/* Lekcja 2026-08-06-012: `.nav a` (specyficzność 0,3,2) bije `.btn` i przycisk w menu
+   dostawał ciasny padding — „Zapytaj o wycenę" wyglądał jak przyklejony do ramki. */
+.nav .nav-links a.btn{padding:11px 18px}
