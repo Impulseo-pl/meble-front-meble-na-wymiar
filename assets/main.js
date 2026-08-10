@@ -596,5 +596,97 @@
     // po sekundzie i tak odsłaniamy treść — nikt nigdy nie zobaczy pustego hero.
     setTimeout(function () { bm.classList.add('bm-in'); }, 1000);
   });
-})();
+  /* ---------- 4) ŚCIANA NAGRAŃ (10.08.2026) ----------
+     plakat -> cicha pętla (rusza dopiero PO NAJECHANIU MYSZKĄ) -> pełne nagranie
+     z dźwiękiem po kliknięciu. Nic nie startuje samo: cztery pętle grające naraz
+     zjadają pamięć i ścinają przewijanie (K. 07.08). */
+  safe('reels', function () {
+    var reels = [].slice.call(document.querySelectorAll('.reel'));
+    if (!reels.length) return;
+    var lacze = navigator.connection || {};
+    var wolnoRuszac = !reduce && !lacze.saveData &&
+      !/^(slow-)?2g$/.test(lacze.effectiveType || '') &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
+    function wideo(fig) { return fig.querySelector('video'); }
+
+    function wlaczPetle(fig) {
+      var v = wideo(fig);
+      if (!v || !v.dataset.petla || v.dataset.tryb === 'petla' || v.dataset.tryb === 'pelne') return;
+      v.dataset.tryb = 'petla';
+      v.muted = true; v.loop = true; v.src = v.dataset.petla;
+      fig.classList.remove('dzwiek');
+      var p = v.play();
+      if (p && p.then) p.then(function () { fig.classList.add('gra'); }).catch(function () {});
+      else fig.classList.add('gra');
+    }
+
+    function wlaczPetleOdNowa(fig) {
+      var v = wideo(fig);
+      if (!v) return;
+      v.dataset.tryb = '';
+      if (wolnoRuszac && fig.matches(':hover')) wlaczPetle(fig);
+      else { v.pause(); fig.classList.remove('gra'); }
+    }
+
+    function wlaczPelne(fig) {
+      var v = wideo(fig);
+      if (!v || !v.dataset.pelne) return;
+      reels.forEach(function (inny) {
+        if (inny !== fig && inny.classList.contains('dzwiek')) {
+          inny.classList.remove('dzwiek');
+          wlaczPetleOdNowa(inny);
+        }
+      });
+      v.dataset.tryb = 'pelne';
+      v.loop = false; v.muted = false; v.src = v.dataset.pelne; v.currentTime = 0;
+      var p = v.play();
+      if (p && p.then) {
+        p.then(function () { fig.classList.add('gra', 'dzwiek'); })
+         .catch(function () { fig.classList.remove('dzwiek'); wlaczPetleOdNowa(fig); });
+      } else { fig.classList.add('gra', 'dzwiek'); }
+    }
+
+    function zatrzymajPetle(fig) {
+      var v = wideo(fig);
+      if (!v || v.dataset.tryb === 'pelne') return;
+      v.pause(); v.dataset.tryb = ''; fig.classList.remove('gra');
+    }
+
+    reels.forEach(function (fig) {
+      var v = wideo(fig), btn = fig.querySelector('.reel-btn');
+      if (!v || !btn) return;
+      if (wolnoRuszac) {
+        fig.addEventListener('mouseenter', function () { wlaczPetle(fig); });
+        fig.addEventListener('mouseleave', function () { zatrzymajPetle(fig); });
+        btn.addEventListener('focus', function () { wlaczPetle(fig); });
+        btn.addEventListener('blur', function () { zatrzymajPetle(fig); });
+      }
+      var opis = (btn.getAttribute('aria-label') || '').replace(/^Włącz dźwięk: /, '');
+      function etykieta() {
+        btn.setAttribute('aria-label', (fig.classList.contains('dzwiek') ? 'Wycisz: ' : 'Włącz dźwięk: ') + opis);
+      }
+      btn.addEventListener('click', function () {
+        if (fig.classList.contains('dzwiek')) { fig.classList.remove('dzwiek'); wlaczPetleOdNowa(fig); }
+        else { wlaczPelne(fig); }
+        etykieta();
+      });
+      v.addEventListener('ended', function () {
+        fig.classList.remove('dzwiek'); wlaczPetleOdNowa(fig); etykieta();
+      });
+    });
+
+    /* wyjechanie sekcji poza ekran gasi to, co jeszcze gra */
+    if ('IntersectionObserver' in window) {
+      var ioR = new IntersectionObserver(function (wpisy) {
+        wpisy.forEach(function (e) {
+          if (e.isIntersecting) return;
+          var fig = e.target, v = wideo(fig);
+          if (!v || v.paused) return;
+          v.pause(); fig.classList.remove('dzwiek');
+        });
+      }, { threshold: 0.2 });
+      reels.forEach(function (fig) { ioR.observe(fig); });
+    }
+  });
+})();
