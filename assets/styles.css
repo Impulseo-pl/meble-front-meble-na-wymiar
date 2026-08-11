@@ -1376,3 +1376,145 @@ footer{view-transition-name:mt-foot}
    reguła `.bm-line > span{display:block}` (0,3,1) bije samą klasę (0,3,0), więc
    inline-block trzeba nadać z tą samą siłą selektora. */
 .hero-cine .brandmark .bm-line > span.bm-nazwa{display:inline-block}
+
+/* ============================================================
+   ZNAK FIRMOWY: WEJŚCIE NA ŚRODEK + LOGO ZAMIAST NAPISU
+   (Dawid, Meet 11.08.2026 — druga wersja, po obejrzeniu pierwszej)
+   Zamysł: wejście nie jest osobną planszą, tylko PIERWSZYM EKRANEM strony.
+   Wielkie logo stoi na zasłonie, zjeżdża do swojego miejsca w hero i w locie
+   przechodzi z czerni na biel, bo ląduje na zdjęciu. Logo w lewym górnym rogu
+   pokazuje się dopiero wtedy, gdy to wielkie zniknie z ekranu.
+   ============================================================ */
+
+/* ---------- 1) NAGŁÓWEK: logo większe, pasek rośnie razem z nim ---------- */
+.nav-inner{height:96px}
+.nav.is-stuck .nav-inner{height:76px}
+.brand-logo{height:78px;max-width:360px}
+.nav.is-stuck .brand-logo{height:60px}
+@media(max-width:920px){.nav-inner{height:82px}.brand-logo{height:64px;max-width:280px}}
+@media(max-width:680px){
+  .nav-inner{height:74px}
+  .brand-logo{height:56px;max-width:230px}
+  .nav.is-stuck .nav-inner{height:66px}
+  .nav.is-stuck .brand-logo{height:48px}
+}
+
+/* Logo w rogu ustępuje, dopóki wielkie logo stoi na ekranie — inaczej ta sama
+   marka wisi dwa razy naraz. Ukrywamy TYLKO gdy działa skrypt (`.js-on`): bez
+   niego nie ma kto z powrotem go pokazać, więc lepiej niech po prostu jest. */
+.nav .brand{transition:opacity .5s var(--ease,ease), transform .5s var(--ease,ease)}
+.js-on body.ma-znak-w-hero .nav .brand{opacity:0;transform:translateY(-12px);pointer-events:none}
+.js-on body.ma-znak-w-hero.znak-poza-ekranem .nav .brand{opacity:1;transform:none;pointer-events:auto}
+
+/* ---------- 2) PIERWSZY EKRAN: wszystko na środku ---------- */
+.hero-srodek .wrap{display:flex;justify-content:center}
+.hero-srodek .hero-copy{
+  max-width:820px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;
+}
+/* Gradient bazowy przyciemniał LEWĄ stronę (pod tekst z lewej). Przy treści na
+   środku trzeba przyciemnić równomiernie, inaczej biały napis siada na jasnym
+   fragmencie zdjęcia i przestaje być czytelny. */
+.hero-srodek::after{
+  /* Dwie warstwy: winieta pod samym znakiem + równomierne przyciemnienie całości.
+     Bez winiety białe logo lądowało na białym froncie szafki i znikało — sam cień
+     tego nie ratował (sprawdzone na zrzucie). */
+  background:
+    radial-gradient(62% 48% at 50% 42%, rgba(10,14,19,.58) 0%, rgba(10,14,19,.30) 58%, rgba(10,14,19,0) 100%),
+    linear-gradient(180deg,rgba(13,18,23,.50) 0%,rgba(13,18,23,.32) 42%,rgba(13,18,23,.72) 100%)
+}
+/* Krótki tekst pod logo. Celowo DROBNY: znakiem głównym jest logo, tekst ma
+   tylko dopowiedzieć co i gdzie (i nieść frazę dla Google, bo duży nagłówek znikł). */
+.hero-srodek h1{
+  font-family:var(--font-body);
+  font-size:clamp(1.05rem,.86rem + .82vw,1.5rem);
+  font-weight:500;letter-spacing:.03em;line-height:1.4;
+  margin:0 0 var(--space-7);max-width:26ch;
+}
+.hero-srodek .hero-actions{justify-content:center}
+.hero-srodek .hero-ocena{
+  margin-top:var(--space-6);color:#fff;font-weight:600;letter-spacing:.02em;opacity:.92
+}
+
+/* ---------- 3) ZNAK FIRMOWY W HERO (dwie warstwy koloru) ---------- */
+.hero-mark{
+  position:relative;display:block;
+  width:min(44vw,420px);margin:0 0 var(--space-6);
+  transform-origin:center center;
+  transition:transform 1.15s cubic-bezier(.16,.84,.44,1), opacity .8s ease;
+  --intro-skala:1.5;
+}
+.hero-mark img{display:block;width:100%;height:auto;transition:opacity .5s ease .3s}
+.hero-mark .mark-jasne{
+  position:absolute;inset:0;
+  filter:brightness(0) invert(1) drop-shadow(0 4px 34px rgba(0,0,0,.72)) drop-shadow(0 1px 3px rgba(0,0,0,.45));
+}
+/* stan spoczynkowy: na zdjęciu widać wersję białą */
+.hero-mark .mark-ciemne{opacity:0}
+.hero-mark .mark-jasne{opacity:1}
+@media(max-width:680px){
+  .hero-mark{width:min(70vw,340px);--intro-skala:1.26}
+  .hero-srodek h1{margin-bottom:var(--space-6)}
+}
+
+/* ---------- 4) WEJŚCIE: zasłona + logo na środku okna ----------
+   Zasłona jest domyślnie WYŁĄCZONA (display:none) i włącza ją dopiero skrypt
+   w <head>. Przy wyłączonym JS albo przy błędzie nikt nie utknie na pustym ekranie.
+   Przesunięcie w pionie (--intro-dy) liczy skrypt: mierzy, ile brakuje logo do
+   środka okna. Na sztywno wpisać się nie da — zależy od wysokości okna i paska. */
+#intro{display:none}
+.intro-on #intro{
+  display:block;position:fixed;inset:0;z-index:100;
+  background:var(--paper);opacity:1;transition:opacity .85s ease;
+}
+.intro-on.intro-out #intro{opacity:0;pointer-events:none}
+.intro-on body{overflow:hidden}
+
+/* logo musi być NAD zasłoną (dlatego wyższy z-index niż #intro) */
+.intro-on .hero-srodek .wrap{z-index:101}
+.intro-on:not(.intro-out) .hero-mark{
+  transform:translateY(calc(var(--intro-dy,0px) + 18px)) scale(calc(var(--intro-skala) * .97));
+  opacity:0;
+}
+.intro-on:not(.intro-out) .hero-mark.mark-wszedl{
+  transform:translateY(var(--intro-dy,0px)) scale(var(--intro-skala));
+  opacity:1;
+}
+/* na zasłonie widać wersję czarną; po jej zdjęciu przechodzi w białą */
+.intro-on:not(.intro-out) .hero-mark .mark-ciemne{opacity:1}
+.intro-on:not(.intro-out) .hero-mark .mark-jasne{opacity:0}
+
+/* tekst, przyciski i ocena wchodzą kaskadą DOPIERO po zdjęciu zasłony */
+.hero-srodek h1,.hero-srodek .hero-actions,.hero-srodek .hero-ocena{
+  transition:opacity .75s ease, transform .75s cubic-bezier(.16,.84,.44,1);
+}
+.hero-srodek h1{transition-delay:.5s}
+.hero-srodek .hero-actions{transition-delay:.68s}
+.hero-srodek .hero-ocena{transition-delay:.86s}
+.intro-on:not(.intro-out) .hero-srodek h1,
+.intro-on:not(.intro-out) .hero-srodek .hero-actions,
+.intro-on:not(.intro-out) .hero-srodek .hero-ocena{
+  opacity:0;transform:translateY(12px);transition-delay:0s;
+}
+/* pomiar pozycji docelowej: skrypt na moment zdejmuje przesunięcie */
+.hero-mark.mierze{transform:none !important;transition:none !important}
+
+@media (prefers-reduced-motion:reduce){
+  .intro-on #intro{display:none}
+  .intro-on body{overflow:auto}
+  .hero-mark,.hero-srodek h1,.hero-srodek .hero-actions,.hero-srodek .hero-ocena{
+    transition:none !important;transform:none !important;opacity:1 !important
+  }
+}
+
+/* ---------- 5) LOGO ZAMIAST NAPISU W POZOSTAŁYCH MIEJSCACH ---------- */
+.foot-brand .foot-logo{
+  display:block;height:56px;width:auto;max-width:260px;
+  filter:brightness(0) invert(1);opacity:.94;
+}
+@media(max-width:680px){.foot-brand .foot-logo{height:46px}}
+.contact-grid .kontakt-logo{
+  display:block;height:64px;width:auto;max-width:290px;
+  margin:var(--space-4) 0 var(--space-6);
+}
+@media(max-width:680px){.contact-grid .kontakt-logo{height:52px}}

@@ -589,13 +589,53 @@
     var bm = document.querySelector('.hero-cine .brandmark');
     if (!bm || reduce) return;
     document.documentElement.classList.add('bm-on');
+    var wejdz = function () { bm.classList.add('bm-in'); };
     requestAnimationFrame(function () {
-      requestAnimationFrame(function () { bm.classList.add('bm-in'); });
+      requestAnimationFrame(wejdz);
     });
     // Bezpiecznik czasowy: gdyby przejście nie wystartowało (np. karta w tle przy wejściu),
     // po sekundzie i tak odsłaniamy treść — nikt nigdy nie zobaczy pustego hero.
-    setTimeout(function () { bm.classList.add('bm-in'); }, 1000);
+    setTimeout(wejdz, 1000);
   });
+  /* ---------- 3b) ZNAK FIRMOWY NA ŚRODKU HERO (Dawid, 11.08.2026) ----------
+     Trzy zadania: (a) na czas zasłony podnieść logo dokładnie na środek OKNA,
+     (b) puścić je do jego miejsca w hero, gdy zasłona schodzi, (c) pokazać logo
+     w lewym górnym rogu dopiero wtedy, gdy to duże zniknie z ekranu. */
+  safe('znak-hero', function () {
+    var mark = document.querySelector('.hero-mark');
+    if (!mark) return;
+    var h = document.documentElement;
+
+    if (h.classList.contains('intro-on') && !reduce) {
+      /* Ile brakuje logo do środka okna. Mierzymy pozycję DOCELOWĄ, więc na jedną
+         klatkę zdejmujemy przesunięcie — bez tego mierzylibyśmy stan już przesunięty. */
+      mark.classList.add('mierze');
+      var r = mark.getBoundingClientRect();
+      mark.classList.remove('mierze');
+      var dy = Math.round(window.innerHeight / 2 - (r.top + r.height / 2));
+      mark.style.setProperty('--intro-dy', dy + 'px');
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { mark.classList.add('mark-wszedl'); });
+      });
+      /* Bezpiecznik: gdyby klatki nie doszły (karta w tle), logo i tak się pokaże. */
+      setTimeout(function () { mark.classList.add('mark-wszedl'); }, 900);
+    }
+
+    /* Logo w rogu wchodzi, gdy duże wyjedzie za górną krawędź. Bez obserwatora
+       (stara przeglądarka) zostaje widoczne — lepiej za dużo marki niż za mało. */
+    if (!('IntersectionObserver' in window)) {
+      document.body.classList.add('znak-poza-ekranem');
+      return;
+    }
+    var io = new IntersectionObserver(function (wpisy) {
+      wpisy.forEach(function (e) {
+        document.body.classList.toggle('znak-poza-ekranem', !e.isIntersecting);
+      });
+    }, { threshold: 0 });
+    io.observe(mark);
+  });
+
   /* ---------- 4) ŚCIANA NAGRAŃ (10.08.2026) ----------
      plakat -> cicha pętla (rusza dopiero PO NAJECHANIU MYSZKĄ) -> pełne nagranie
      z dźwiękiem po kliknięciu. Nic nie startuje samo: cztery pętle grające naraz

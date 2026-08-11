@@ -17,9 +17,44 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=10">
+<link rel="stylesheet" href="assets/styles.css?v=12">
+<script>
+/* WEJŚCIE Z LOGO (prośba Dawida 11.08.2026) — skrypt w <head>, żeby strona nie mignęła
+   przed zasłoną. Overlay w CSS jest domyślnie wyłączony; włącza go dopiero ta klasa,
+   więc przy wyłączonym JS wejścia po prostu nie ma i nic się nie blokuje.
+   Pokazujemy RAZ na wizytę, nie przy każdej podstronie. */
+(function(){
+  try{
+    var h0 = document.documentElement;
+    h0.classList.add('js-on');   /* bez skryptu logo w rogu ma zostać widoczne */
+    if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    /* ?intro na końcu adresu = wejście zagra jeszcze raz (do pokazywania klientowi) */
+    var znowu = location.search.indexOf('intro') > -1;
+    if (!znowu && sessionStorage.getItem('mf-intro')) return;
+    sessionStorage.setItem('mf-intro','1');
+    var h = document.documentElement;
+    h.classList.add('intro-on');
+    var zdjete = false;
+    function koniec(){
+      if (zdjete) return; zdjete = true;
+      h.classList.add('intro-out');
+      try { document.dispatchEvent(new CustomEvent('intro:end')); } catch(e){}
+      setTimeout(function(){ h.classList.remove('intro-on','intro-out'); }, 800);
+    }
+    setTimeout(koniec, 2150);
+    /* twardy bezpiecznik: cokolwiek by nie padło, po 4 s zasłony nie ma */
+    setTimeout(function(){ h.classList.remove('intro-on','intro-out'); }, 4000);
+    document.addEventListener('click', koniec);
+    window.addEventListener('wheel', koniec, {passive:true});
+    window.addEventListener('touchstart', koniec, {passive:true});
+    window.addEventListener('keydown', koniec);
+  }catch(e){}
+})();
+</script>
 </head>
-<body>
+<body class="ma-znak-w-hero">
+<div id="intro" aria-hidden="true"></div>
+
 
 <header class="nav">
   <div class="wrap nav-inner">
@@ -36,20 +71,23 @@
   </div>
 </header>
 
-<section class="hero-cine">
+<section class="hero-cine hero-srodek">
   <img src="img/hero.jpg" fetchpriority="high" alt="Meble FRONT - Meble na wymiar w Słupsku. Od pomiaru po montaż. ">
   <div class="wrap">
     <div class="hero-copy">
-      <div class="brandmark bm-l"><span class="bm-line"><span class="bm-nazwa">Meble FRONT<sup class="bm-r" aria-label="znak zastrzeżony">&#174;</sup></span></span></div>
-
-      <span class="eyebrow">Meble na wymiar</span>
-      <h1>Meble na wymiar w Słupsku. Od pomiaru po montaż. </h1>
-      <p class="lead">Najpierw pomiar i projekt, decyzja potem. Mebel powstaje pod Twoje wnętrze - ze skosem i krzywą ścianą włącznie.</p>
+      <!-- Znak firmowy: dwie warstwy tego samego logo. Ciemna jest widoczna na zasłonie
+           wejścia, jasna na zdjęciu - przy zdejmowaniu zasłony jedna przechodzi w drugą,
+           więc logo "zmienia kolor" zamiast mrugnąć. -->
+      <div class="hero-mark">
+        <img class="mark-ciemne" src="img/logo-r.png" alt="" aria-hidden="true">
+        <img class="mark-jasne" src="img/logo-r.png" alt="Meble FRONT">
+      </div>
+      <h1>Meble na wymiar w Słupsku. Od pomiaru po montaż.</h1>
       <div class="hero-actions">
         <a href="realizacje.html" class="btn btn-accent">Zobacz realizacje <span class="arr">→</span></a>
-        <a href="kontakt.html" class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.45)">Zapytaj o wycenę</a>
+        <a href="kontakt.html" class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.45)">Zapytaj o wycenę</a>
       </div>
-      <div style="margin-top:var(--space-6);color:#fff;font-weight:600;letter-spacing:.02em;opacity:.92"><svg class="ico-star" width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-2px" aria-hidden="true"><path d="M12 2.8l2.85 5.8 6.4.93-4.63 4.5 1.1 6.37L12 17.4l-5.72 3 1.1-6.37-4.63-4.5 6.4-.93L12 2.8Z" fill="currentColor"/></svg> Ocena 4,9 w Google · 39 opinii</div>
+      <div class="hero-ocena"><svg class="ico-star" width="14" height="14" viewBox="0 0 24 24" style="vertical-align:-2px" aria-hidden="true"><path d="M12 2.8l2.85 5.8 6.4.93-4.63 4.5 1.1 6.37L12 17.4l-5.72 3 1.1-6.37-4.63-4.5 6.4-.93L12 2.8Z" fill="currentColor"/></svg> Ocena 4,9 w Google · 39 opinii</div>
     </div>
   </div>
 </section>
@@ -188,7 +226,7 @@
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
-        <div class="name">Meble FRONT&#174;</div>
+        <img class="foot-logo" src="img/logo-r.png" alt="Meble FRONT">
         <p>Meble kuchenne, szafy i zabudowy na wymiar. Pracownia w Słupsku, ul. Wrocławska 44.</p>
       </div>
       <div class="foot-col">
@@ -207,7 +245,7 @@
       </div>
     </div>
     <div class="foot-bot">
-      <span>© 2026 Meble FRONT</span>
+      <span>© 2026 Meble FRONT&#174;</span>
       <span>Projekt strony: <a class="foot-credit" href="https://impulseo.pl" target="_blank" rel="noopener">Impulseo</a></span>
     </div>
   </div>
